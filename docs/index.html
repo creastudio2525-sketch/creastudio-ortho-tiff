@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="オルソTIFFを1枚に統合し、1 GB以内に変換するCreaStudioのツール。">
+  <title>オルソTIFF変換 | CreaStudio</title>
+  <link rel="icon" href="./assets/mark.png">
+  <link rel="stylesheet" href="./assets/tokens.305a8c22e216.css">
+  <link rel="stylesheet" href="./tower.61d2f0089a2e.css">
+  <link rel="stylesheet" href="./style.a4c4f8ab03bc.css">
+  <link rel="stylesheet" href="./viewer-loading.a35eb9beb6dc.css">
+  <script src="./app.c8a312802a39.js" defer></script>
+  <script src="./viewer.9d9656aa35bd.js" defer></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/><path d="M13 3v7h7M8 16h8m-8 2.5h5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v3"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  </svg>
+  <header class="topbar">
+    <div class="frame topbar-inner">
+      <a class="logo-link" href="https://member.creastudio.co.jp/index.php" target="_blank" rel="noopener noreferrer" aria-label="CreaStudio会員ページを新しいタブで開く">
+        <img class="logo" src="./assets/logo.png" alt="CreaStudio">
+      </a>
+      <div class="topbar-tools">
+        <button class="button outline" id="viewer-open" type="button"><svg aria-hidden="true"><use href="#i-eye"></use></svg>TIFFビューア</button>
+        <div class="local"><svg aria-hidden="true"><use href="#i-lock"></use></svg>ブラウザ内で処理</div>
+      </div>
+    </div>
+  </header>
+  <main class="frame">
+    <section class="intro" aria-labelledby="title">
+      <h1 id="title">オルソ<span>TIFF</span>変換</h1>
+      <p>複数のオルソ画像を座標に沿って1枚にまとめ、1 GB以内のTIFFを作成します。</p>
+    </section>
+    <div class="workspace">
+      <section class="panel input" aria-labelledby="input-title">
+        <div class="panel-title">
+          <h2 id="input-title">入力ファイル</h2>
+          <span class="limit-label">合計 6 GBまで</span>
+        </div>
+        <div class="drop" id="drop">
+          <div class="upload-icon"><svg aria-hidden="true"><use href="#i-upload"></use></svg></div>
+          <p class="drop-title">TIFFをここにドロップ</p>
+          <p class="drop-formats">.tif / .tiff <span aria-hidden="true">·</span> 複数選択可</p>
+          <input id="files" type="file" accept=".tif,.tiff,image/tiff" multiple hidden>
+          <button class="button outline" id="pick" type="button">ファイルを選択</button>
+        </div>
+        <div class="selection">
+          <div class="selection-header">
+            <div><strong id="count">0件</strong><span class="separator">/</span><span id="total">0 B</span></div>
+            <button class="text-button" id="clear" type="button" hidden>すべて削除</button>
+          </div>
+          <ul id="file-list" class="file-list" aria-label="選択中のファイル" tabindex="0" hidden></ul>
+          <p id="selection-error" class="error" role="alert" hidden></p>
+        </div>
+      </section>
+      <section class="panel output" aria-labelledby="output-title">
+        <div class="panel-title"><h2 id="output-title">出力ファイル</h2></div>
+        <div class="output-name">
+          <div class="file-icon"><svg aria-hidden="true"><use href="#i-file"></use></svg></div>
+          <p>6-1 オルソ 出来形計測データ.tiff</p>
+        </div>
+        <dl class="spec">
+          <div><dt>形式</dt><dd>TIFF（.tiff）</dd></div>
+          <div><dt>圧縮</dt><dd>LZW（可逆圧縮）</dd></div>
+          <div><dt>出力容量</dt><dd id="output-size">1 GB以内</dd></div>
+          <div id="resolution-row" hidden><dt>画像サイズ</dt><dd id="resolution"></dd></div>
+          <div id="crs-row" hidden><dt>座標系</dt><dd id="crs"></dd></div>
+        </dl>
+        <div class="action">
+          <button id="convert" class="button primary" type="button" disabled>TIFFを作成<svg aria-hidden="true"><use href="#i-arrow"></use></svg></button>
+          <a id="download" class="button primary" download="6-1 オルソ 出来形計測データ.tiff" hidden><svg aria-hidden="true"><use href="#i-download"></use></svg>TIFFをダウンロード</a>
+          <button id="viewer-result" class="button outline result-view" type="button" hidden><svg aria-hidden="true"><use href="#i-eye"></use></svg>変換結果を表示</button>
+          <p id="result-note" class="result-note" role="status" hidden></p>
+          <p id="job-error" class="error" role="alert" hidden></p>
+        </div>
+      </section>
+      <details class="panel windows-howto" open>
+        <summary>WindowsでTIFFを開く方法</summary>
+        <div class="howto-body">
+          <ol>
+            <li>TIFFを右クリック</li>
+            <li>「プログラムから開く」</li>
+            <li>「Windows フォト ビューアー」または「フォト」を選択</li>
+          </ol>
+          <a href="./assets/windows-tiff-howto.png" target="_blank" rel="noopener" aria-label="Windowsの操作画像を拡大表示">
+            <img src="./assets/windows-tiff-howto.png" alt="TIFFを右クリックし、「プログラムから開く」から「Windows フォト ビューアー」を選ぶ手順" width="666" height="412">
+          </a>
+        </div>
+      </details>
+    </div>
+    <aside class="help" aria-label="入力と出力について">
+      <svg aria-hidden="true"><use href="#i-info"></use></svg>
+      <p>同じ座標系・解像度・画素位置のGeoTIFFを統合できます。1 GBを超える場合は、座標範囲を保って解像度を調整します。</p>
+    </aside>
+  </main>
+  <dialog id="tiff-viewer" aria-labelledby="viewer-title">
+    <div class="viewer-titlebar">
+      <div><h2 id="viewer-title">TIFFビューア</h2><p id="viewer-file-label"></p></div>
+      <button id="viewer-close" class="text-button viewer-close" aria-label="ビューアを閉じる" type="button"><svg aria-hidden="true"><use href="#i-close"></use></svg></button>
+    </div>
+    <div class="viewer-toolbar">
+      <button id="viewer-pick" class="button outline" type="button">TIFFを開く</button>
+      <input id="viewer-input" type="file" accept=".tif,.tiff,image/tiff" hidden>
+      <div id="viewer-zoom-tools" class="zoom-tools" hidden>
+        <button id="viewer-minus" class="text-button" aria-label="縮小" type="button">−</button>
+        <output id="viewer-zoom">100%</output>
+        <button id="viewer-plus" class="text-button" aria-label="拡大" type="button">＋</button>
+        <button id="viewer-fit" class="text-button" type="button">全体表示</button>
+      </div>
+    </div>
+    <div id="viewer-stage" class="viewer-stage">
+      <canvas id="viewer-canvas" tabindex="0" aria-label="TIFF画像。矢印キーで移動、プラス・マイナスで拡大縮小"></canvas>
+      <p id="viewer-placeholder">TIFFファイルをここにドロップ<br>または「TIFFを開く」から選択</p>
+      <div class="viewer-drop-overlay" aria-hidden="true">
+        <div><svg><use href="#i-upload"></use></svg>ここにドロップして開く</div>
+      </div>
+      <div id="viewer-loading" class="viewer-loader" hidden>
+        <div class="loading-text" aria-hidden="true">TIFFを読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+        <progress id="viewer-progress" max="100" aria-label="表示範囲の読み込み進捗"></progress>
+        <span id="viewer-progress-value" aria-hidden="true"></span>
+      </div>
+    </div>
+    <p id="viewer-status" class="viewer-status" role="status"></p>
+  </dialog>
+  <dialog id="processing-dialog" aria-labelledby="processing-title">
+    <div class="processing-head">
+      <div class="tower-stage" aria-hidden="true">
+        <div class="loader">
+          <div class="box box-1"><div class="side-left"></div><div class="side-right"></div><div class="side-top"></div></div>
+          <div class="box box-2"><div class="side-left"></div><div class="side-right"></div><div class="side-top"></div></div>
+          <div class="box box-3"><div class="side-left"></div><div class="side-right"></div><div class="side-top"></div></div>
+          <div class="box box-4"><div class="side-left"></div><div class="side-right"></div><div class="side-top"></div></div>
+        </div>
+      </div>
+      <div class="processing-copy">
+        <h2 id="processing-title" tabindex="-1" autofocus>TIFFを作成中</h2>
+        <div class="progress-area">
+          <div class="progress-copy"><span id="status" role="status"></span><span id="percentage"></span></div>
+          <progress id="progress" max="100" value="0" aria-label="処理の進み具合"></progress>
+          <button class="text-button cancel" id="cancel" type="button">中止する</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

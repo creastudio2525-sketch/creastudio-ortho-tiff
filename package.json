@@ -1,0 +1,19 @@
+{
+  "name": "creastudio-ortho-tiff",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ブラウザ内でオルソTIFFを統合し、1 GB以内のLZW GeoTIFFを作成するCreaStudioツール",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "fflate": "^0.8.3",
+    "geotiff": "^3.0.5"
+  }
+}
