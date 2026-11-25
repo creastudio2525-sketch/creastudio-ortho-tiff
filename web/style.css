@@ -183,7 +183,9 @@ progress::-moz-progress-bar { background: var(--crea-blue); border-radius: 8px; 
 .processing-head { display: flex; align-items: center; gap: 19px; }
 .processing-head h2:focus { outline: none; }
 .processing-copy { flex: 1; min-width: 0; }
-.tower-stage { display: grid; place-items: center; flex: 0 0 128px; height: 128px; }
+/* Keep the scaled, moving blocks inside their stage so the dialog's scroll
+   area stays constant throughout the animation. */
+.tower-stage { display: grid; place-items: center; flex: 0 0 128px; height: 128px; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .tower-stage .box { animation: none; }
   .tower-stage .box-1 { opacity: 1; }
